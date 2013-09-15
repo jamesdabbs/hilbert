@@ -1,3 +1,5 @@
+require 'json'
+
 %w{ 
   version
   formula

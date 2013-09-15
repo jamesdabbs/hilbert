@@ -14,19 +14,28 @@ module Hilbert
     # -- Common formula interface -----
 
     def self.load str
-      negated  = str =~ /~\s*/
-      p,v      = str.gsub(/~\s*/, '').split('=').map &:strip
-      property = Atom.parse_name_or_id p, Property
-      value    = Atom.parse_name_or_id v, Value, Value.true
-      new property, value, negated
+      # negated  = str =~ /~\s*/
+      # p,v      = str.gsub(/~\s*/, '').split('=').map &:strip
+      # property = Atom.parse_name_or_id p, Property
+      # value    = Atom.parse_name_or_id v, Value, Value.true
+      # new property, value, negated
+      h = JSON.parse str
+      new h["property"], h["value"]
     end
 
     def self.dump atom
-      "#{atom.property.name} = #{atom.value.name}"
+      atom.to_json
     end
 
     def to_s &block
       block ? block.call(self) : name
+    end
+
+    def to_json opts={}
+      {
+        property: property,
+        value:    value
+      }.to_json
     end
 
     def spaces where=true
@@ -77,14 +86,16 @@ module Hilbert
     private # ----------
 
     def name
-      case value
-      when Value.true
-        property.name
-      when Value.false
-        "¬ #{property.name}"
-      else
-        "#{property.name} = #{value.name}"
-      end
+      "#{property}=#{value}"
+      # FIXME:
+      # case value
+      # when Value.true
+      #   property.name
+      # when Value.false
+      #   "¬ #{property.name}"
+      # else
+      #   "#{property.name} = #{value.name}"
+      # end
     end
 
     def self.parse_name_or_id str, klass, default=nil

@@ -1,31 +1,30 @@
 require 'spec_helper'
 
-# def Formula.ld str
-#   Formula.dump Formula.load str
-# end
-
 describe Hilbert::Formula do
+  (:a .. :f).each do |name|
+    let(name) { Hilbert::Atom.new name, true }
+  end
+
+  def standardize str
+    Hilbert::Formula.dump Hilbert::Formula.load str
+  end
+
+  def preserves f
+    d = Hilbert::Formula.dump f
+    expect( d ).to eq standardize d
+  end
+
+  it { preserves a + b              }
+  it { preserves a | b                 }
+  it { preserves a + (b | c)           }
+  it { preserves a | (b + c + (d | e)) }
+  it { preserves d | (e + f)           }
+
   pending
-  # atoms :a, :b, :c, :d, :e
 
   # let :f do
   #   FactoryGirl.create(:property, name: 'Escaped $\sigma$-math').atom
   # end
-
-  # def standardize str
-  #   Formula.dump Formula.load str
-  # end
-
-  # def preserves f
-  #   d = Formula.dump f
-  #   expect( d ).to eq standardize d
-  # end
-
-  # it { preserves a + b                 }
-  # it { preserves a | b                 }
-  # it { preserves a + (b | c)           }
-  # it { preserves a | (b + c + (d | e)) }
-  # it { preserves d | (e + f)           }
 
   # context 'condensed syntax parsing' do
 
