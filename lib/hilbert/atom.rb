@@ -54,10 +54,25 @@ module Hilbert
       Atom.new @property, !@value
     end
 
-    def verify space
-      witness = space.traits.where(property: @property, value: @value).first
-      witness.nil? ? false : [witness]
+    class << self
+      attr_reader :verifiers
+      @verifiers = {}
+
+      def verify klass, &block
+        @verifiers ||= {}
+        @verifiers[klass] = block
+      end
     end
+
+    def verify obj
+      verifier = self.class.verifiers[obj.class]
+      instance_exec obj, &verifier
+    end
+
+    # def verify space
+    #   witness = space.traits.where(property: @property, value: @value).first
+    #   witness.nil? ? false : [witness]
+    # end
 
     def force space, assumptions, theorem, index
       trait = space.traits.create! property: @property, value: @value, deduced: true

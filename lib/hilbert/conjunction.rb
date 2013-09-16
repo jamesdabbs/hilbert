@@ -16,7 +16,7 @@ module Hilbert
     end
 
     def verify space
-      flat_map { |sf| sf.verify(space) or return false }
+      flat_map { |sf| sf.verify(space) or return }
     end
 
     def force space, assumptions, theorem, index
