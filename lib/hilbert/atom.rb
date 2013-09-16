@@ -38,35 +38,48 @@ module Hilbert
       }.to_json
     end
 
-    def spaces where=true
-      if where.nil?
-        set = @property.traits.pluck :space_id
-        spaces = set.empty? ? Space : Space.where('id NOT IN (?)', set)
-        spaces.pluck :id
-      elsif where
-        @property.traits.where(value_id: @value.id).pluck :space_id
-      else
-        @property.traits.where(value_id: @value.compliment).pluck :space_id
-      end
-    end
+    # def spaces where=true
+    #   if where.nil?
+    #     set = @property.traits.pluck :space_id
+    #     spaces = set.empty? ? Space : Space.where('id NOT IN (?)', set)
+    #     spaces.pluck :id
+    #   elsif where
+    #     @property.traits.where(value_id: @value.id).pluck :space_id
+    #   else
+    #     @property.traits.where(value_id: @value.compliment).pluck :space_id
+    #   end
+    # end
 
     def ~
       Atom.new @property, !@value
     end
 
     class << self
-      attr_reader :verifiers
-      @verifiers = {}
+      attr_reader :verifiers, :searchers
 
       def verify klass, &block
-        @verifiers ||= {}
+        @verifiers      ||= {}
         @verifiers[klass] = block
+      end
+
+      def search klass, &block
+        @searchers      ||= {}
+        @searchers[klass] = block
       end
     end
 
     def verify obj
       verifier = self.class.verifiers[obj.class]
       instance_exec obj, &verifier
+    end
+
+    def search value=true, classes=nil
+      classes ||= self.class.searchers.keys
+      searchers = self.class.searchers.values_at *classes
+      searchers.reduce Set.new do |acc, fn|
+        acc.merge instance_exec value, &fn
+        acc
+      end
     end
 
     # def verify space

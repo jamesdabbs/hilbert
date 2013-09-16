@@ -3,14 +3,6 @@ module Hilbert
 
     # -- Common formula interface -----
 
-    def spaces where=true
-      subs = map { |sf| sf.spaces where }
-      # True if any is true
-      # False if all are false
-      # Nil if any is nil
-      where == false ? intersection(subs) : union(subs)
-    end
-
     def ~
       Conjunction.new *map(&:~)
     end
@@ -19,6 +11,14 @@ module Hilbert
       # FIXME: memoize this verify call
       witness = find { |sf| sf.verify space }
       witness.nil? ? false : witness.verify(space)
+    end
+
+    def search value=true, classes=nil
+      subs = map { |sf| sf.search value, classes }
+      # True if any is true
+      # False if all are false
+      # Nil if any is nil
+      value == false ? intersection(subs) : union(subs)
     end
 
     def force space, assumptions, theorem, index

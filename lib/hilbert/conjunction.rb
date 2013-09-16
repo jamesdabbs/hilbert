@@ -3,20 +3,20 @@ module Hilbert
 
     # -- Common formula interface -----
 
-    def spaces where=true
-      subs = map { |sf| sf.spaces where }
-      # True if all are true
-      # False if any is false
-      # Nil if any is nil
-      where ? intersection(subs) : union(subs)
-    end
-
     def ~
       Disjunction.new *subformulae.map(&:~)
     end
 
     def verify space
       flat_map { |sf| sf.verify(space) or return }
+    end
+
+    def search value=true, classes=nil
+      subs = map { |sf| sf.search value, classes }
+      # True if all are true
+      # False if any is false
+      # Nil if any is nil
+      value ? intersection(subs) : union(subs)
     end
 
     def force space, assumptions, theorem, index
