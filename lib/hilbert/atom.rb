@@ -1,5 +1,11 @@
 module Hilbert
   class Atom < Formula
+    # -- Support for serialization types -----
+    class << self
+      attr_accessor :property, :value
+    end
+    self.property = self.value = JSON
+
     attr_accessor :property, :value
 
     def initialize property, value, negated=false
@@ -14,28 +20,19 @@ module Hilbert
     # -- Common formula interface -----
 
     def self.load str
-      # negated  = str =~ /~\s*/
-      # p,v      = str.gsub(/~\s*/, '').split('=').map &:strip
-      # property = Atom.parse_name_or_id p, Property
-      # value    = Atom.parse_name_or_id v, Value, Value.true
-      # new property, value, negated
-      h = JSON.parse str
-      new h["property"], h["value"]
+      negated  = str =~ /~\s*/
+      p,v      = str.gsub(/~\s*/, '').split('=').map &:strip
+      property = Atom.property.load p
+      value    = Atom.value.load v
+      new property, value
     end
 
     def self.dump atom
-      atom.to_json
+      "#{Atom.property.dump(property)} = #{Atom.value.dump(value)}"
     end
 
     def to_s &block
       block ? block.call(self) : name
-    end
-
-    def to_json opts={}
-      {
-        property: property,
-        value:    value
-      }.to_json
     end
 
     # def spaces where=true
